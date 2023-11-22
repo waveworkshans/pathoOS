@@ -135,9 +135,38 @@ def reformat_data(input_str):
         dates.reverse()
         output_data.reverse()
     return dates, output_data
-
-# Replace your main function with this
+    
 def main():
+    st.title('Data Reformatter')
+    
+    # Sample input data
+    input_data = st.text_area("Insert input:", "Paste your data here...")
+    
+    if input_data and "Paste your data here..." not in input_data:
+        dates, output_data = reformat_data(input_data)
+        
+        if len(output_data) < 1:
+            st.write("No data to display.")
+            return
+        
+        results = ''
+        for i, date in enumerate(dates):
+            output_data_sub = ''
+            for x in output_data:
+                if x[1][i] != '':
+                    output_data_sub += f"{x[0]}{x[1][i]}/"
+            output_data_sub = f"({date})\n{output_data_sub[:-1]}"
+            results += output_data_sub + "\n\n"  # Adding an extra newline for spacing between dates.
+        
+        st.text('Output:')
+        st.write(results)
+    else:
+        st.write("Please paste your data in the text area above.")
+
+if __name__ == "__main__":
+    main()
+# Replace your main function with this
+#def main():
     st.title('Data Reformatter')
     # Sample input data
     input_data = st.text_area("Pathology input:", "Paste your data here...")
