@@ -139,6 +139,32 @@ def reformat_data(input_str):
 def main():
     st.title('Data Reformatter')
     
+    # Define all possible blood test options and default selected tests
+    all_test_options = [
+        'Hb', 'WCC', 'Neut',
+        'PltC', 'Na', 'K', 'Cl', 'Ur', 'Cr', 'eGFR', 'CaCorrected', 'Mg', 'Phos', 'CRP',
+        'Bil', 'Glo', 'Alb', 'AST', 'ALT', 'GGT', 'ALP', 'VitB12', 'Fer', 'Iron', 'Transferrin',
+        'TransferrinSaturation', 'Folate'
+    ]
+    default_selected_tests = [
+        'Hb', 'WCC', 'Neut',
+        'PltC', 'Na', 'K', 'Cl', 'Ur', 'Cr', 'eGFR', 'CaCorrected', 'Mg', 'Phos', 'CRP',
+        'Bil', 'Glo', 'Alb', 'AST', 'ALT', 'GGT', 'ALP', 'VitB12', 'Fer', 'Iron', 'Transferrin',
+        'TransferrinSaturation', 'Folate'
+    ]
+
+    # Initialize the session state for selected tests if it doesn't already exist
+    if 'selected_tests' not in st.session_state:
+        st.session_state['selected_tests'] = default_selected_tests
+
+    # Display checkboxes for test selection
+    for test in all_test_options:
+        is_checked = st.checkbox(test, value=(test in st.session_state['selected_tests']))
+        if is_checked and test not in st.session_state['selected_tests']:
+            st.session_state['selected_tests'].append(test)
+        elif not is_checked and test in st.session_state['selected_tests']:
+            st.session_state['selected_tests'].remove(test)
+
     # Sample input data
     input_data = st.text_area("Insert Pathology input:", "Paste your data here...")
     
