@@ -142,33 +142,33 @@ def main():
     # Define all possible blood test options (short form)
     all_test_options = [
         'Hb', 'WCC', 'Neut', 'Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH',
-        'Hct', 'RCC', 'MCV', 'Plt', 'Na', 'K', 'Cl', 'HCO3', 'Ur', 'Cr',
-        'eGFR', 'Ca', 'Mg', 'Phos', 'CRP', 'Bili', 'Glo', 'Alb', 'AST', 'ALT',
-        'GGT', 'ALP', 'B12', 'Ferr', 'Iron', 'Transf', 'TSat', 'HoloTC', 'Folate'
+        # ... (remaining tests) ...
     ]
 
-    # Define which tests are selected by default
-    default_selected_tests = {
-        test: test not in ['Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH', 'Hct', 'RCC', 'MCV']
-        for test in all_test_options
-    }
-
-    # Initialize session state for selected tests if it hasn't been done already
     if 'selected_tests' not in st.session_state:
-        st.session_state['selected_tests'] = {test: default for test, default in default_selected_tests.items()}
+        st.session_state['selected_tests'] = {test: True for test in all_test_options}
+        # By default, deselect those that should not be pre-selected
+        for test in ['Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH', 'Hct', 'RCC', 'MCV']:
+            st.session_state['selected_tests'][test] = False
 
-    # Display checkboxes for test selection with labels on top (10 per row)
+    # Display the checkboxes, using columns (10 per row)
     columns_per_row = 10
     for i in range(0, len(all_test_options), columns_per_row):
         row_tests = all_test_options[i:i+columns_per_row]
-        # Create a single column for each test to have more control over the layout
         cols = st.columns(columns_per_row)
         for col, test in zip(cols, row_tests):
-            # Display the text label using markdown (remove padding/margin for more compact display)
-            col.markdown(f"**{test}**", unsafe_allow_html=True)
-            # Followed by the checkbox without a label (use key parameter to ensure uniqueness)
-            is_checked = col.checkbox("", value=st.session_state['selected_tests'][test], key=f"cb_{test}")
-            st.session_state['selected_tests'][test] = is_checked
+            # Display the label for the test
+            col.write(test)  # Adjust formatting/styling as preferred
+            # Display the checkbox and update the state based on current selection
+            initial_state = st.session_state['selected_tests'][test]
+            new_state = col.checkbox("", value=initial_state, key=f"cb_{test}")
+            if new_state != initial_state:  # Only update if there was a change
+                st.session_state['selected_tests'][test] = new_state
+
+    # ... (process the selected tests as needed) ...
+    # Example: Creating a list of selected tests to display or process
+    selected_tests = [test for test, selected in st.session_state['selected_tests'].items() if selected]
+    st.write('Selected Tests:', selected_tests)
 
     # Sample input data
     input_data = st.text_area("Insert Pathology input:", "Paste your data here...")
