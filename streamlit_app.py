@@ -137,37 +137,34 @@ def reformat_data(input_str):
     return dates, output_data
     
 def main():
-    st.title('Data Reformatter')
+    st.title('Blood Test Selector')
     
-    # Define all possible blood test options
+    # Define all possible blood test options (short form)
     all_test_options = [
-        'Hb', 'WCC', 'Neut', 'Baso', 'Eosin', 'Mono', 'Lymph', 'RDW', 'MCHC', 'MCH', 'Hct', 'RCC', 'MCV',
-        'PltC', 'Na', 'K', 'Cl', 'Bicarbonate', 'Ur', 'Cr', 'eGFR', 'CaCorrected', 'Mg', 'Phos', 'CRP',
-        'Bil', 'Glo', 'Alb', 'AST', 'ALT', 'GGT', 'ALP', 'VitB12', 'Fer', 'Iron', 'Transferrin',
-        'TransferrinSaturation', 'Holotranscobalamin', 'Folate'
+        'Hb', 'WCC', 'Neut', 'Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH',
+        'Hct', 'RCC', 'MCV', 'Plt', 'Na', 'K', 'Cl', 'HCO3', 'Ur', 'Cr',
+        'eGFR', 'Ca', 'Mg', 'Phos', 'CRP', 'Bili', 'Glo', 'Alb', 'AST', 'ALT',
+        'GGT', 'ALP', 'B12', 'Ferr', 'Iron', 'Transf', 'TSat', 'HoloTC', 'Folate'
     ]
 
-    # Default selected tests don't include the specified unselected options
-    default_selected_tests = [test for test in all_test_options if test not in (
-        'Baso', 'Eosin', 'Mono', 'Lymph', 'RDW', 'MCHC', 'MCH', 'Hct', 'RCC', 'MCV'
-    )]
+    default_selected = {
+        test: test not in ['Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH', 'Hct', 'RCC', 'MCV']
+        for test in all_test_options
+    }
 
+    # Initialize session state for selected tests if it doesn't already exist
     if 'selected_tests' not in st.session_state:
-        st.session_state['selected_tests'] = default_selected_tests
+        st.session_state['selected_tests'] = {test: selected for test, selected in default_selected.items()}
 
-    # Display the checkboxes in rows of 10
-    columns = 10  # Define how many columns you want per row
-    for i in range(0, len(all_test_options), columns):
-        cols = st.columns(columns)
-        for col, test in zip(cols, all_test_options[i:i+columns]):
+    # Display checkboxes for test selection (10 per row)
+    columns_per_row = 10
+    rows = [all_test_options[i:i+columns_per_row] for i in range(0, len(all_test_options), columns_per_row)]
+    for row in rows:
+        cols = st.columns(columns_per_row)
+        for col, test in zip(cols, row):
             # Show the checkbox on the column
-            is_checked = col.checkbox(test, value=(test in st.session_state['selected_tests']), key=test)
-            if is_checked:
-                if test not in st.session_state['selected_tests']:
-                    st.session_state['selected_tests'].append(test)
-            else:
-                if test in st.session_state['selected_tests']:
-                    st.session_state['selected_tests'].remove(test)
+            is_checked = col.checkbox(test, value=st.session_state['selected_tests'][test], key=test)
+            st.session_state['selected_tests'][test] = is_checked
 
     # Sample input data
     input_data = st.text_area("Insert Pathology input:", "Paste your data here...")
