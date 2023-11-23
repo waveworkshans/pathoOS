@@ -138,9 +138,6 @@ def reformat_data(input_str):
     
 def main():
     st.title('Blood Test Selector')
-    
-    def main():
-    st.title('Blood Test Selector')
 
     # Define all possible blood test options (short form)
     all_test_options = [
