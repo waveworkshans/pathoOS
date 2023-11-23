@@ -141,8 +141,10 @@ def main():
     
     # Define all possible blood test options (short form)
     all_test_options = [
-        'Hb', 'WCC', 'Neut', 'Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH',
-        # ... (remaining tests) ...
+        'Hb', 'WCC', 'Neut', 'Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH','Hct', 'RCC', 'MCV', 'Plt', 'Na', 'K', 'Cl', 'HCO3', 'Ur', 'Cr',
+        'eGFR', 'Ca', 'Mg', 'Phos', 'CRP', 'Bili', 'Glo', 'Alb', 'AST', 'ALT',
+        'GGT', 'ALP', 'B12', 'Ferr', 'Iron', 'Transf', 'TSat', 'HoloTC', 'Folate'
+        
     ]
 
     if 'selected_tests' not in st.session_state:
