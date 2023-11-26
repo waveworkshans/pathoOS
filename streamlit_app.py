@@ -3,6 +3,10 @@ import streamlit as st
 import re
 import time
 
+desired_output = {
+    'Hb', 'WCC', 'PltC', 'Na', 'K', 'Ur', 'Cr', 'eGFR', 'Troponin', 'CaCorrected',
+    'Mg', 'Phos', 'Alb', 'Bil', 'ALT', 'AST', 'GGT', 'ALP', 'CRP'
+}
 
 def reformat_data(input_str):
 
@@ -36,6 +40,7 @@ def reformat_data(input_str):
         if 'HaemoglobinWhite' in input_str:
             start_index = input_str.find('HaemoglobinWhite')
         substring = input_str[start_index:]
+        names = []
         output_data1 = []
         output_data2 = []
         for i,j in enumerate(names):
@@ -63,6 +68,8 @@ def reformat_data(input_str):
                 output_data1[i].reverse()
             output_data2.append(output_data1[i])
             # print(names[i][0] + str(output_data1[i]))
+    names = [name for name in names if name[0] in desired_output]
+    output_data2 = [data for data in output_data2 if data[0] in desired_output]
     elif 'Sodium' in input_str:
         names = []
         names.append(['Na',	r'(\d{3}|--|See Below|HAEM)(\s(H|L))?\s?',	145]) if 'Sodium' in input_str else None
@@ -96,6 +103,7 @@ def reformat_data(input_str):
         names.append(['Folate',	r'(\d{1,2}\.\d{1}|--|See Below|HAEM)(\s(H|L))?\s?',	99]) if 'Folate' in input_str else None
         if 'SodiumPotassium' not in input_str:
             names.reverse()
+            output_data2.reverse()
         start_index = 0
         if 'SodiumPotassium' in input_str:
             start_index = input_str.find('SodiumPotassium')
@@ -136,37 +144,34 @@ def reformat_data(input_str):
     if 'SodiumPotassium' not in input_str:
         dates.reverse()
         output_data.reverse()
+    output_data = list(zip(names, output_data2))
+
     return dates, output_data
 
 def main():
-    # Use Streamlit's text_area widget to receive input data from the user.
-    # The user will paste the lab data into this text area.
+    # Use Streamlit's text_area widget to get user input
     input_data = st.text_area("Paste the lab data here:", height=300)
 
-    # Streamlit runs the entire script whenever the user interacts with the interface.
-    # Below, we setup a button which when clicked will trigger the reformatting of the data.
+    # Setup a button that when clicked will process the input data
     if st.button('Reformat Data'):
-        if input_data:  # Ensure input_data is not empty
-            # Call the reformat_data function to process the input string when button is pressed.
+        if input_data:
+            # Process the input data
             dates, output_data = reformat_data(input_data)
-            
-            if len(output_data) < 1:
+
+            if not output_data:
                 st.write("No data to display.")
                 return
 
-            # Loop through formatted data and display it using Streamlit's write function.
+            # Display the results
             for i, date in enumerate(dates):
                 output_data_sub = ''
-                for x in output_data:
-                    if x[1][i] != '':
-                        output_data_sub += f"{x[0]}{x[1][i]}/"
+                for name, values in output_data:
+                    if values[i] and name[0] in desired_output:
+                        output_data_sub += f"{name[0]}{values[i]}/"
                 output_data_sub = f"({date})\n{output_data_sub[:-1]}"
                 st.write(output_data_sub)
         else:
-            # If no input was given, display a message to the user.
             st.error("Please paste the data into the text area above and press the 'Reformat Data' button.")
 
-# Ensure the script only runs main when executed as an app through Streamlit, not when imported as a module.
 if __name__ == "__main__":
     main()
-
