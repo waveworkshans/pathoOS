@@ -1,12 +1,9 @@
 
 import streamlit as st
+
 import re
 import time
 
-desired_output = {
-    'Hb', 'WCC', 'PltC', 'Na', 'K', 'Ur', 'Cr', 'eGFR', 'Troponin', 'CaCorrected',
-    'Mg', 'Phos', 'Alb', 'Bil', 'ALT', 'AST', 'GGT', 'ALP', 'CRP'
-}
 
 def reformat_data(input_str):
 
@@ -16,7 +13,6 @@ def reformat_data(input_str):
     output_data = []
     input_str = re.sub(r'\([^)]*\)', '', input_str)
     input_str = re.sub(r'Vitamin B12', 'Vitamin B', input_str)
-    input_str = re.sub(r'x109/L', '', input_str)
     # print(input_str)
     if 'Haemoglobin' in input_str:
         names = []
@@ -40,7 +36,6 @@ def reformat_data(input_str):
         if 'HaemoglobinWhite' in input_str:
             start_index = input_str.find('HaemoglobinWhite')
         substring = input_str[start_index:]
-        names = []
         output_data1 = []
         output_data2 = []
         for i,j in enumerate(names):
@@ -68,8 +63,6 @@ def reformat_data(input_str):
                 output_data1[i].reverse()
             output_data2.append(output_data1[i])
             # print(names[i][0] + str(output_data1[i]))
-    names = [name for name in names if name[0] in desired_output]
-    output_data2 = [data for data in output_data2 if data[0] in desired_output]
     elif 'Sodium' in input_str:
         names = []
         names.append(['Na',	r'(\d{3}|--|See Below|HAEM)(\s(H|L))?\s?',	145]) if 'Sodium' in input_str else None
@@ -79,8 +72,6 @@ def reformat_data(input_str):
         names.append(['Ur',	r'(\d{1,2}\.\d{1}|--|See Below|HAEM)(\s(H|L))?\s?',	9]) if 'Urea' in input_str else None
         names.append(['Cr',	r'(\d{2,3}|--|See Below|HAEM)(\s(H|L))?\s?',	90]) if 'Creatinine' in input_str else None
         names.append(['eGFR',	r'(\d{2,3}|--|HAEM)(\s(H|L))?\s?',	999]) if 'eGFR' in input_str else None
-        names.append(['Troponin',	r'(\d{1,2}|--|HAEM)(\s(H|L))?\s?',	20]) if 'Troponin' in input_str else None
-        names.append(['Zscore',	r'(\d{1,2}\.\d{2}|--|HAEM)(\s(H|L))?\s?',	20]) if 'Z Score' in input_str else None
         names.append(['Ca',	r'(\d{1}\.\d{2}|--|See Below|HAEM)(\s(H|L))?\s?',	2.6]) if 'Calcium' in input_str else None
         names.append(['CaCorrected',	r'(\d{1}\.\d{2}|--)(\s(H|L))?\s?',	2.6]) if 'Calcium Corrected' in input_str else None
         names.append(['Mg',	r'(\d{1}\.\d{2}|--|See Below|HAEM)(\s(H|L))?\s?',	1.1]) if 'Magnesium' in input_str else None
@@ -91,7 +82,7 @@ def reformat_data(input_str):
         names.append(['Bil',	r'(\d{1,2}|--|See Below|HAEM)(\s(H|L))?\s?',	21]) if 'Bilirubin' in input_str else None
         names.append(['ALT',	r'(\d{1,2}|--|See Below|HAEM)(\s(H|L))?\s?',	35]) if 'ALT' in input_str else None
         names.append(['AST',	r'(\d{1,2}|--|See Below|HAEM)(\s(H|L))?\s?',	30]) if 'AST' in input_str else None
-        names.append(['GGT',	r'(\d{1,2}|--|See Below|HAEM)(\s(H|L))?\s?',	50]) if 'GGT' in input_str else None
+        names.append(['GGT',	r'(\d{1,2}|--|See Below|HAEM)(\s(H|L))?\s?',	35]) if 'GGT' in input_str else None
         names.append(['ALP',	r'(\d{2,3}|--|See Below|HAEM)(\s(H|L))?\s?',	110]) if 'ALP' in input_str else None
         names.append(['CRP',	r'(\d{2,3}|--|See Below|HAEM)(\s(H|L))?\s?',	999]) if 'CRP' in input_str else None
         names.append(['Fer',	r'(\d{2,3}|--|See Below|HAEM)(\s(H|L))?\s?',	300]) if 'Ferritin' in input_str else None
@@ -103,7 +94,6 @@ def reformat_data(input_str):
         names.append(['Folate',	r'(\d{1,2}\.\d{1}|--|See Below|HAEM)(\s(H|L))?\s?',	99]) if 'Folate' in input_str else None
         if 'SodiumPotassium' not in input_str:
             names.reverse()
-            output_data2.reverse()
         start_index = 0
         if 'SodiumPotassium' in input_str:
             start_index = input_str.find('SodiumPotassium')
@@ -144,34 +134,66 @@ def reformat_data(input_str):
     if 'SodiumPotassium' not in input_str:
         dates.reverse()
         output_data.reverse()
-    output_data = list(zip(names, output_data2))
-
     return dates, output_data
-
+    
 def main():
-    # Use Streamlit's text_area widget to get user input
-    input_data = st.text_area("Paste the lab data here:", height=300)
+    st.title('Blood Test Selector')
 
-    # Setup a button that when clicked will process the input data
-    if st.button('Reformat Data'):
-        if input_data:
-            # Process the input data
-            dates, output_data = reformat_data(input_data)
+    # Define all possible blood test options (short form)
+    all_test_options = [
+        'Hb', 'WCC', 'Neut', 'Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH',
+        'Hct', 'RCC', 'MCV', 'Plt', 'Na', 'K', 'Cl', 'HCO3', 'Ur', 'Cr',
+        'eGFR', 'Ca', 'Mg', 'Phos', 'CRP', 'Bili', 'Glo', 'Alb', 'AST', 'ALT',
+        'GGT', 'ALP', 'B12', 'Ferr', 'Iron', 'Transf', 'TSat', 'HoloTC', 'Folate'
+    ]
 
-            if not output_data:
-                st.write("No data to display.")
-                return
+    # Define which tests are selected by default
+    default_selected_tests = {
+        test: test not in ['Baso', 'Eos', 'Mono', 'Lymp', 'RDW', 'MCHC', 'MCH', 'Hct', 'RCC', 'MCV']
+        for test in all_test_options
+    }
 
-            # Display the results
-            for i, date in enumerate(dates):
-                output_data_sub = ''
-                for name, values in output_data:
-                    if values[i] and name[0] in desired_output:
-                        output_data_sub += f"{name[0]}{values[i]}/"
-                output_data_sub = f"({date})\n{output_data_sub[:-1]}"
-                st.write(output_data_sub)
-        else:
-            st.error("Please paste the data into the text area above and press the 'Reformat Data' button.")
+    # Initialize session state for selected tests if it hasn't been done already
+    if 'selected_tests' not in st.session_state:
+        st.session_state['selected_tests'] = {test: default for test, default in default_selected_tests.items()}
+
+    # Display checkboxes for test selection with labels on top (10 per row)
+    columns_per_row = 10
+    for i in range(0, len(all_test_options), columns_per_row):
+        row_tests = all_test_options[i:i+columns_per_row]
+        # Create a single column for each test to have more control over the layout
+        cols = st.columns(columns_per_row)
+        for col, test in zip(cols, row_tests):
+            # Display the text label using markdown (remove padding/margin for more compact display)
+            col.markdown(f"**{test}**", unsafe_allow_html=True)
+            # Followed by the checkbox without a label (use key parameter to ensure uniqueness)
+            is_checked = col.checkbox("", value=st.session_state['selected_tests'][test], key=f"cb_{test}")
+            st.session_state['selected_tests'][test] = is_checked
+
+    # Sample input data
+    input_data = st.text_area("Insert Pathology input:", "Paste your data here...")
+    
+    if input_data and "Paste your data here..." not in input_data:
+        dates, output_data = reformat_data(input_data)
+        
+        if len(output_data) < 1:
+            st.write("No data to display.")
+            return
+        
+        results = ''
+        for i, date in enumerate(dates):
+            output_data_sub = ''
+            for x in output_data:
+                if x[1][i] != '':
+                    output_data_sub += f"{x[0]}{x[1][i]}/"
+            output_data_sub = f"({date})\n{output_data_sub[:-1]}"
+            results += output_data_sub + "\n\n"  # Adding an extra newline for spacing between dates.
+        
+        st.text('Output:')
+        st.write(results)
+    else:
+        st.write("Please paste your data in the text area above.")
 
 if __name__ == "__main__":
     main()
+
